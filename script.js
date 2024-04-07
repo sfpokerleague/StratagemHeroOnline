@@ -24,11 +24,11 @@ select.size = 10
 // Copy the styles from the div
 select.style.cssText = window.getComputedStyle(configDiv).cssText;
 
-// Populate the multiselector with the strategem names
-for (const strategem of stratagems) {
+// Populate the multiselector with the stratagem names
+for (const stratagem of stratagems) {
   const option = document.createElement('option');
-  option.value = strategem.name;
-  option.text = strategem.name;
+  option.value = stratagem.name;
+  option.text = stratagem.name;
   select.appendChild(option);
 }
 
@@ -49,19 +49,19 @@ selectContainerDiv.style.flexDirection = 'column';
 // Insert the div after the configDiv
 configDiv.insertAdjacentElement('afterend', selectContainerDiv);
 
-let activeStrategems = [];
-// Update the activeStrategems variable and filter the stratagems array when the button is clicked
+let activeStratagems = [];
+// Update the activeStratagems variable and filter the stratagems array when the button is clicked
 button.addEventListener('click', () => {
-  activeStrategems = Array.from(select.selectedOptions).map(option => option.value);
+  activeStratagems = Array.from(select.selectedOptions).map(option => option.value);
 
   // Filter stratagems by active ones only
-  stratagems = stratagems.filter(stratagem => activeStrategems.includes(stratagem.name));
+  stratagems = stratagems.filter(stratagem => activeStratagems.includes(stratagem.name));
   loadStratagems();
   refreshStratagemDisplay();
 });
 
 // Insert the button after the select element
-select.insertAdjacentElement('afterend', button);// Initialize activeStrategems as an empty array
+select.insertAdjacentElement('afterend', button);// Initialize activeStratagems as an empty array
 
 
 // Install keypress listener
