@@ -12,7 +12,19 @@ if (xhr.status === 200) {
 }
 
 stratagems = JSON.parse(stratagems);
-// console.log(stratagems);
+
+// List of straegems names to use
+const activeStrategems = [
+    "Reinforce", "Eagle Strike", "Gatling Sentry"
+];
+
+// Filter straegems by active ones only
+stratagems = stratagems.filter(stratagem => activeStrategems.includes(stratagem.name));
+
+// log stratagem names
+for (let stratagem of stratagems) {
+    console.log(stratagem.name);
+}
 
 // Install keypress listener
 function mainGameKeyDownListener(event) {
