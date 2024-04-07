@@ -13,18 +13,56 @@ if (xhr.status === 200) {
 
 stratagems = JSON.parse(stratagems);
 
-// List of straegems names to use
-const activeStrategems = [
-    "Reinforce", "Eagle Strike", "Gatling Sentry"
-];
+// Get the div
+const configDiv = document.getElementById('game-config-popup');
 
-// Filter straegems by active ones only
-stratagems = stratagems.filter(stratagem => activeStrategems.includes(stratagem.name));
+// Create the multiselector
+const select = document.createElement('select');
+select.multiple = true;
+select.size = 10
 
-// log stratagem names
-for (let stratagem of stratagems) {
-    console.log(stratagem.name);
+// Copy the styles from the div
+select.style.cssText = window.getComputedStyle(configDiv).cssText;
+
+// Populate the multiselector with the strategem names
+for (const strategem of stratagems) {
+  const option = document.createElement('option');
+  option.value = strategem.name;
+  option.text = strategem.name;
+  select.appendChild(option);
 }
+
+// Create the submit button
+const button = document.createElement('button');
+button.textContent = 'Submit';
+
+const selectContainerDiv = document.createElement('div');
+
+// Append the select and button elements to the div
+selectContainerDiv.appendChild(select);
+selectContainerDiv.appendChild(button);
+
+// Apply CSS to the div to stack its children vertically
+selectContainerDiv.style.display = 'flex';
+selectContainerDiv.style.flexDirection = 'column';
+
+// Insert the div after the configDiv
+configDiv.insertAdjacentElement('afterend', selectContainerDiv);
+
+let activeStrategems = [];
+// Update the activeStrategems variable and filter the stratagems array when the button is clicked
+button.addEventListener('click', () => {
+  activeStrategems = Array.from(select.selectedOptions).map(option => option.value);
+
+  // Filter stratagems by active ones only
+  stratagems = stratagems.filter(stratagem => activeStrategems.includes(stratagem.name));
+  loadStratagems();
+  refreshStratagemDisplay();
+});
+
+// Insert the button after the select element
+select.insertAdjacentElement('afterend', button);// Initialize activeStrategems as an empty array
+
 
 // Install keypress listener
 function mainGameKeyDownListener(event) {
@@ -131,10 +169,7 @@ if(storedArrowKeysConfig) {
 if(userIsMobile())
     showMobileButtons();
 
-// Load first stratagems
-for(let i = 0; i < CURRENT_STRATAGEM_LIST_LENGTH; i++){
-    currentStratagemsList.push(pickRandomStratagem());
-}
+loadStratagems();
 
 // Show stratagems
 refreshStratagemDisplay();
@@ -143,6 +178,16 @@ refreshStratagemDisplay();
 countDown();
 
 //~~~//
+
+// Load current stratagems
+function loadStratagems(){
+    currentStratagemsList = [];
+
+    for(let i = 0; i < CURRENT_STRATAGEM_LIST_LENGTH; i++){
+        currentStratagemsList.push(pickRandomStratagem());
+    }
+}
+
 
 function keypress(keyCode){
     // Ignore invalid keypresses
@@ -272,6 +317,8 @@ function shakeArrows(time){
 
 function refreshStratagemDisplay(){
     for(let i in currentStratagemsList){
+        console.log(`Stratagem ${i}: ${currentStratagemsList[i].name}`);
+
         // Show the stratagem's picture in the correct slot
         if (currentStratagemsList[i].image) {
             document.getElementById(`stratagem-icon-${i}`).src = `./data/Images/Stratagem\ Icons/hd2/${currentStratagemsList[i].image}`;
