@@ -2,7 +2,7 @@
 var stratagems = undefined;
 
 var xhr = new XMLHttpRequest();
-xhr.open(method='GET', url='./data/HD2-Sequences.json', async=false); // false indicates synchronous request
+xhr.open(method = 'GET', url = './data/HD2-Sequences.json', async = false); // false indicates synchronous request
 xhr.send();
 
 if (xhr.status === 200) {
@@ -13,56 +13,75 @@ if (xhr.status === 200) {
 
 stratagems = JSON.parse(stratagems);
 
-// Get the div
-const configDiv = document.getElementById('game-config-popup');
+let activeStratagems = [
+    "Reinforace",
+    "Resupply",
+    "Flamethrower",
+    "Autocannon",
+    "Orbital Laser",
+    "Eagle Airstrike",
+    "Supply Pack",
+    "Grenade Launcher",
+    "Guard Dog Rover",
+    "Gattling Sentry"
+];
+filterActiveStrategems();
 
-// Create the multiselector
-const select = document.createElement('select');
-select.multiple = true;
-select.size = 10
+const showSelector = false;
 
-// Copy the styles from the div
-select.style.cssText = window.getComputedStyle(configDiv).cssText;
+if (showSelector) {
+    const configDiv = document.getElementById('game-config-popup');
 
-// Populate the multiselector with the stratagem names
-for (const stratagem of stratagems) {
-  const option = document.createElement('option');
-  option.value = stratagem.name;
-  option.text = stratagem.name;
-  select.appendChild(option);
+    // Create the multiselector
+    const select = document.createElement('select');
+    select.multiple = true;
+    select.size = 10
+
+    // Copy the styles from the div
+    select.style.cssText = window.getComputedStyle(configDiv).cssText;
+
+    // Populate the multiselector with the stratagem names
+    for (const stratagem of stratagems) {
+        const option = document.createElement('option');
+        option.value = stratagem.name;
+        option.text = stratagem.name;
+        select.appendChild(option);
+    }
+
+    // Create the submit button
+    const button = document.createElement('button');
+    button.textContent = 'Submit';
+
+    const selectContainerDiv = document.createElement('div');
+
+    // Append the select and button elements to the div
+    selectContainerDiv.appendChild(select);
+    selectContainerDiv.appendChild(button);
+
+    // Apply CSS to the div to stack its children vertically
+    selectContainerDiv.style.display = 'flex';
+    selectContainerDiv.style.flexDirection = 'column';
+
+    // Insert the div after the configDiv
+    configDiv.insertAdjacentElement('afterend', selectContainerDiv);
+
+    // Update the activeStratagems variable and filter the stratagems array when the button is clicked
+    button.addEventListener('click', () => {
+        activeStratagems = Array.from(select.selectedOptions).map(option => option.value);
+
+        // Filter stratagems by active ones only
+        filterActiveStrategems();
+        loadStratagems();
+        refreshStratagemDisplay();
+    });
+
+    // Insert the button after the select element
+    select.insertAdjacentElement('afterend', button);// Initialize activeStratagems as an empty array
 }
 
-// Create the submit button
-const button = document.createElement('button');
-button.textContent = 'Submit';
-
-const selectContainerDiv = document.createElement('div');
-
-// Append the select and button elements to the div
-selectContainerDiv.appendChild(select);
-selectContainerDiv.appendChild(button);
-
-// Apply CSS to the div to stack its children vertically
-selectContainerDiv.style.display = 'flex';
-selectContainerDiv.style.flexDirection = 'column';
-
-// Insert the div after the configDiv
-configDiv.insertAdjacentElement('afterend', selectContainerDiv);
-
-let activeStratagems = [];
-// Update the activeStratagems variable and filter the stratagems array when the button is clicked
-button.addEventListener('click', () => {
-  activeStratagems = Array.from(select.selectedOptions).map(option => option.value);
-
-  // Filter stratagems by active ones only
-  stratagems = stratagems.filter(stratagem => activeStratagems.includes(stratagem.name));
-  loadStratagems();
-  refreshStratagemDisplay();
-});
-
-// Insert the button after the select element
-select.insertAdjacentElement('afterend', button);// Initialize activeStratagems as an empty array
-
+function filterActiveStrategems() {
+    stratagems = stratagems.filter(stratagem => activeStratagems.includes(stratagem.name));
+}
 
 // Install keypress listener
 function mainGameKeyDownListener(event) {
@@ -154,22 +173,25 @@ const storedArrowKeysConfig = localStorage.getItem("CONFIG.arrowKeys") ? JSON.pa
 const CONFIG = {};
 
 
-if(storedArrowKeysConfig) {
+if (storedArrowKeysConfig) {
     CONFIG.arrowKeys = storedArrowKeysConfig;
 } else {
     CONFIG.arrowKeys = {
-        up:"KeyW",
-        down:"KeyS",
-        left:"KeyA",
-        right:"KeyD"
+        up: "KeyW",
+        down: "KeyS",
+        left: "KeyA",
+        right: "KeyD"
     }
 }
 
 // Show directional buttons if user is on mobile
-if(userIsMobile())
+if (userIsMobile())
     showMobileButtons();
 
-loadStratagems();
+// Load first stratagems
+for(let i = 0; i < CURRENT_STRATAGEM_LIST_LENGTH; i++){
+    currentStratagemsList.push(pickRandomStratagem());
+}
 
 // Show stratagems
 refreshStratagemDisplay();
@@ -180,19 +202,19 @@ countDown();
 //~~~//
 
 // Load current stratagems
-function loadStratagems(){
+function loadStratagems() {
     currentStratagemsList = [];
 
-    for(let i = 0; i < CURRENT_STRATAGEM_LIST_LENGTH; i++){
+    for (let i = 0; i < CURRENT_STRATAGEM_LIST_LENGTH; i++) {
         currentStratagemsList.push(pickRandomStratagem());
     }
 }
 
 
-function keypress(keyCode){
+function keypress(keyCode) {
     // Ignore invalid keypresses
     let sfx;
-    switch(keyCode){
+    switch (keyCode) {
         case "ArrowUp":
         case CONFIG.arrowKeys.up:
             sfx = sfxUp;
@@ -213,17 +235,17 @@ function keypress(keyCode){
             sfx = sfxRight;
             keyCode = "KeyD";
             break;
-        default: 
+        default:
             return;
     }
 
     //b
 
     //Route keypress to proper handling function
-    switch(gameState){
+    switch (gameState) {
         case "initial":
             gameState = "running";
-            // Exclusion of `break;` here is intentional. The first keypress of the game should apply to the sequence
+        // Exclusion of `break;` here is intentional. The first keypress of the game should apply to the sequence
         case "running":
             checkGameKeypress(keyCode, sfx);
             break;
@@ -235,14 +257,14 @@ function keypress(keyCode){
     }
 }
 
-function checkGameKeypress(keyCode, sfx){
+function checkGameKeypress(keyCode, sfx) {
     // Check the keypress against the current sequence
-    if(keyCode == currentArrowSequenceTags[currentSequenceIndex].code){
+    if (keyCode == currentArrowSequenceTags[currentSequenceIndex].code) {
         //Success, apply the success
         currentSequenceIndex++;
-        
+
         //Check if that success completes the entire sequence. 
-        if(currentSequenceIndex == currentArrowSequenceTags.length){
+        if (currentSequenceIndex == currentArrowSequenceTags.length) {
             //Add time bonus and pause the countdown for the delay time
             timeRemaining += CORRECT_TIME_BONUS;
             gameState = "hitlag";
@@ -261,20 +283,20 @@ function checkGameKeypress(keyCode, sfx){
             }, NEW_STRATEGEM_TIMEOUT);
         }
     }
-    else if (keyCode == currentArrowSequenceTags[0].code){
+    else if (keyCode == currentArrowSequenceTags[0].code) {
         //Edge case; if they're wrong but their input is the same as the first code, reset to first.
         currentSequenceIndex = 1;
 
         //Play failure animation
         shakeArrows(FAILURE_SHAKE_TIME);
     }
-    else{
+    else {
         //Failure, reset progress
         currentSequenceIndex = 0;
 
         //Play failure animation
         shakeArrows(FAILURE_SHAKE_TIME);
-    }   
+    }
 
     updateArrowFilters(currentArrowSequenceTags, currentSequenceIndex);
 
@@ -282,14 +304,14 @@ function checkGameKeypress(keyCode, sfx){
     sfx.paused ? sfx.play() : sfx.currentTime = 0;
 }
 
-function checkRefreshKeypress(keyCode, sfx){
+function checkRefreshKeypress(keyCode, sfx) {
     // Check the keypress against the current sequence
-    if(keyCode == refreshArrowSequenceTags[currentRefreshIndex].code){
+    if (keyCode == refreshArrowSequenceTags[currentRefreshIndex].code) {
         //Success, apply the success
         currentRefreshIndex++;
-        
+
         //If that completes the entire sequence, reload the window after a short delay
-        if(currentRefreshIndex == refreshArrowSequenceTags.length){
+        if (currentRefreshIndex == refreshArrowSequenceTags.length) {
             setTimeout(() => {
                 window.location.reload()
             }, 300);
@@ -301,22 +323,22 @@ function checkRefreshKeypress(keyCode, sfx){
     sfx.paused ? sfx.play() : sfx.currentTime = 0;
 }
 
-function updateArrowFilters(arrowTags, index){
-    for(i = 0; i < arrowTags.length; i++){
+function updateArrowFilters(arrowTags, index) {
+    for (i = 0; i < arrowTags.length; i++) {
         arrowTags[i].setAttribute("class", i < index ? "arrow-complete-filter" : "arrow-incomplete-filter")
     }
 }
 
-function shakeArrows(time){
-    document.getElementById("arrows-container").setAttribute("style", `animation: shake ${time/1000}s;`);
+function shakeArrows(time) {
+    document.getElementById("arrows-container").setAttribute("style", `animation: shake ${time / 1000}s;`);
 
     setTimeout(() => {
         document.getElementById("arrows-container").removeAttribute("style");
     }, 200);
 }
 
-function refreshStratagemDisplay(){
-    for(let i in currentStratagemsList){
+function refreshStratagemDisplay() {
+    for (let i in currentStratagemsList) {
         console.log(`Stratagem ${i}: ${currentStratagemsList[i].name}`);
 
         // Show the stratagem's picture in the correct slot
@@ -335,12 +357,12 @@ function refreshStratagemDisplay(){
     document.getElementById("stratagem-name").innerHTML = currentStratagemsList[0].name;
 }
 
-function pickRandomStratagem(){
+function pickRandomStratagem() {
     return stratagems[Math.floor(Math.random() * stratagems.length)];
 }
 
-function showArrowSequence(arrowSequence, arrowsContainer){
-    if(arrowsContainer == undefined)
+function showArrowSequence(arrowSequence, arrowsContainer) {
+    if (arrowsContainer == undefined)
         arrowsContainer = document.getElementById("arrows-container");
 
     // Remove all table elements of old arrows
@@ -348,7 +370,7 @@ function showArrowSequence(arrowSequence, arrowsContainer){
 
     //Create new arrow elements
     let arrowTags = [];
-    for(arrow of arrowSequence){
+    for (arrow of arrowSequence) {
         let td = document.createElement("td");
         let img = document.createElement("img");
         td.appendChild(img);
@@ -356,19 +378,19 @@ function showArrowSequence(arrowSequence, arrowsContainer){
         img.setAttribute("class", `arrow-incomplete-filter`);
 
         // Map filename to keycode
-        switch(arrow){
+        switch (arrow) {
             case "U":
                 img.code = "KeyW";
-            break;
+                break;
             case "D":
                 img.code = "KeyS";
-            break;
+                break;
             case "L":
                 img.code = "KeyA";
-            break;
+                break;
             case "R":
                 img.code = "KeyD";
-            break;
+                break;
         }
         arrowsContainer.appendChild(td);
         arrowTags.push(img);
@@ -376,7 +398,7 @@ function showArrowSequence(arrowSequence, arrowsContainer){
     return arrowTags;
 }
 
-function gameOver(){
+function gameOver() {
     //Stop the game
     gameState = "over";
 
@@ -407,36 +429,36 @@ function gameOver(){
     sfxGameOver[Math.floor(Math.random() * sfxGameOver.length)].play();
 }
 
-function stratagemListToString(html, spamless){
+function stratagemListToString(html, spamless) {
     // Set direction characters based on argument
     let up = "🡅", down = "🡇", left = "🡄", right = "🡆";
-    if(userIsMobile()){
+    if (userIsMobile()) {
         up = "⬆️", down = "⬇️", left = "⬅️", right = "➡️";
     }
 
-    if(spamless){
+    if (spamless) {
         up = "U", down = "D", left = "L", right = "R";
     }
 
     let re = "";
-    for(let stratagem of completedStrategemsList){
+    for (let stratagem of completedStrategemsList) {
         let line = `${stratagem.name}: `;
 
         //Put arrows
-        for(let direction of stratagem.sequence){
-            switch(direction){
+        for (let direction of stratagem.sequence) {
+            switch (direction) {
                 case "U":
-                    line += up; 
-                break;
+                    line += up;
+                    break;
                 case "D":
                     line += down;
-                break;
+                    break;
                 case "L":
                     line += left;
-                break;
+                    break;
                 case "R":
                     line += right;
-                break;
+                    break;
             }
         }
         line += html ? "<br>" : "\n";
@@ -446,7 +468,7 @@ function stratagemListToString(html, spamless){
     return re;
 }
 
-function copyShare(spamless){
+function copyShare(spamless) {
     // Gather text and write to clipboard
     let output = `## My Stratagem Hero Online Score: ${completedStrategemsList.length}\n`
     output += stratagemListToString(false, spamless);
@@ -465,21 +487,22 @@ function copyShare(spamless){
     }, 3000);
 }
 
-async function countDown(){
-    if(gameState == "over")
+async function countDown() {
+    
+    if (gameState == "over")
         return;
 
-    if(timeRemaining <= 0){
+    if (timeRemaining <= 0) {
         gameOver();
         return;
     }
 
     //Calculate the true delta time since last check
     //This should fix #2 
-    if(lastCheckedTime == undefined)
+    if (lastCheckedTime == undefined)
         lastCheckedTime = Date.now();
     let now = Date.now();
-    let trueDeltaT = now-lastCheckedTime;
+    let trueDeltaT = now - lastCheckedTime;
     lastCheckedTime = now;
 
     // Immediately Set timeout for next countdown step
@@ -489,35 +512,35 @@ async function countDown(){
     }, COUNTDOWN_STEP);
 
     // Apply countdown if it's not paused
-    if(gameState != "hitlag" && gameState != "initial")
+    if (gameState != "hitlag" && gameState != "initial")
         timeRemaining -= trueDeltaT;
     updateTimeBar();
 }
 
-function updateTimeBar(){
-    let bar = document.getElementById("time-remaining-bar");  
-    let width = (timeRemaining/TOTAL_TIME) * 100;
+function updateTimeBar() {
+    let bar = document.getElementById("time-remaining-bar");
+    let width = (timeRemaining / TOTAL_TIME) * 100;
     // console.log(width);
-    bar.style.width = `${width}%`;   
+    bar.style.width = `${width}%`;
 }
 
-async function sleep(ms){
+async function sleep(ms) {
     await new Promise(r => setTimeout(r, ms));
 }
 
 function userIsMobile() {
     return navigator.userAgent.match(/Android/i)
-    || navigator.userAgent.match(/webOS/i)
-    || navigator.userAgent.match(/iPhone/i)
-    || navigator.userAgent.match(/iPad/i)
-    || navigator.userAgent.match(/iPod/i)
-    || navigator.userAgent.match(/BlackBerry/i)
-    || navigator.userAgent.match(/Windows Phone/i);
+        || navigator.userAgent.match(/webOS/i)
+        || navigator.userAgent.match(/iPhone/i)
+        || navigator.userAgent.match(/iPad/i)
+        || navigator.userAgent.match(/iPod/i)
+        || navigator.userAgent.match(/BlackBerry/i)
+        || navigator.userAgent.match(/Windows Phone/i);
 }
 
 function showMobileButtons() {
     container = document.getElementById("mobile-button-container");
-    
+
     container.removeAttribute("hidden");
     container.style.visibility = "visible";
 }
@@ -538,7 +561,7 @@ function configPopupButtonListener(event) {
             case "game-config--save":
                 //save controls
                 configSaveArrowKeys();
-                //NOTE: This is a intentional missing break as i want both the save and the popup close to happen due to there not being any more settings here
+            //NOTE: This is a intentional missing break as i want both the save and the popup close to happen due to there not being any more settings here
             case "game-config--close":
             case "game-config--open":
                 //close popup
@@ -570,12 +593,12 @@ let configPopupEvents = [
     ["keydown", configPopupKeydownListener]
 ];
 function addConfigPopupListener() {
-    configPopupEvents.forEach((event)=>{
+    configPopupEvents.forEach((event) => {
         addEventListener(event[0], event[1]);
     })
 }
 function removeConfigPopupListener() {
-    configPopupEvents.forEach((event)=>{
+    configPopupEvents.forEach((event) => {
         removeEventListener(event[0], event[1]);
     })
 }
@@ -611,11 +634,11 @@ function getConfigPopupInputs() {
 function initaliseConfigPopupInputs() {
     let inputs = getConfigPopupInputs();
 
-    inputs.forEach((input)=>{
-        let inputKey = Object.keys(CONFIG.arrowKeys).find((key)=>{
+    inputs.forEach((input) => {
+        let inputKey = Object.keys(CONFIG.arrowKeys).find((key) => {
             return key.toLowerCase() == input.name.toLowerCase();
         });
-        
+
         if (inputKey) {
             input.value = CONFIG.arrowKeys[inputKey].slice(-1).toUpperCase();
         }
