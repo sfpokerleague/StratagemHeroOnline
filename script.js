@@ -13,18 +13,42 @@ if (xhr.status === 200) {
 
 stratagems = JSON.parse(stratagems);
 
-let activeStratagems = [
-    "Reinforace",
-    "Resupply",
-    "Flamethrower",
-    "Autocannon",
-    "Orbital Laser",
-    "Eagle Airstrike",
-    "Supply Pack",
-    "Grenade Launcher",
-    "Guard Dog Rover",
-    "Gattling Sentry"
-];
+let activeStratagems = undefined;
+
+const enemmy = "BOTS";
+// "Autocannon Sentry",
+// "Autocannon",
+// "Eagle 500KG Bomb",
+// "Eagle Airstrike",
+// "Flamethrower",
+// "Gattling Sentry",
+// "Grenade Launcher",
+// "Guard Dog Rover",
+// "Orbital Laser",
+// "Reinforace",
+// "Resupply",
+
+if (enemmy === "BUGS") {
+    activeStratagems = [
+        "Flamethrower",
+        "Gattling Sentry",
+        "Guard Dog Rover",
+        "Orbital Laser",
+        "Reinforace",
+        "Resupply",
+    ];
+}
+else {
+    activeStratagems = [
+        "Autocannon Sentry",
+        "Autocannon",
+        "Eagle 500KG Bomb",
+        "Gattling Sentry",
+        "Reinforace",
+        "Resupply",
+    ]
+}
+
 filterActiveStrategems();
 
 const showSelector = false;
@@ -189,7 +213,7 @@ if (userIsMobile())
     showMobileButtons();
 
 // Load first stratagems
-for(let i = 0; i < CURRENT_STRATAGEM_LIST_LENGTH; i++){
+for (let i = 0; i < CURRENT_STRATAGEM_LIST_LENGTH; i++) {
     currentStratagemsList.push(pickRandomStratagem());
 }
 
@@ -488,7 +512,8 @@ function copyShare(spamless) {
 }
 
 async function countDown() {
-    
+    return;
+
     if (gameState == "over")
         return;
 
