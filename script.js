@@ -16,41 +16,33 @@ stratagems = JSON.parse(stratagems);
 let activeStratagems = undefined;
 
 const enemmy = "BOTS";
-// "Autocannon Sentry",
-// "Autocannon",
-// "Eagle 500KG Bomb",
-// "Eagle Airstrike",
-// "Flamethrower",
-// "Gattling Sentry",
-// "Grenade Launcher",
-// "Guard Dog Rover",
-// "Orbital Laser",
-// "Reinforace",
-// "Resupply",
 
 if (enemmy === "BUGS") {
     activeStratagems = [
+        "Eagle Airstrike",
         "Flamethrower",
-        "Gattling Sentry",
         "Guard Dog Rover",
         "Orbital Laser",
-        "Reinforace",
-        "Resupply",
     ];
 }
 else {
     activeStratagems = [
-        "Autocannon Sentry",
         "Autocannon",
-        "Eagle 500KG Bomb",
-        "Gattling Sentry",
-        "Reinforace",
-        "Resupply",
+        "Eagle Airstrike",
+        "Orbital Laser",
+        "Orbital Railcannon Strike"
     ]
 }
 
+// add reinforce and resupply to the active stratagems
+activeStratagems.push("Reinforce");
+// activeStratagems.push("Resupply");
 filterActiveStrategems();
 
+// print strategem names
+for (const stratagem of stratagems) {
+    console.log(stratagem.name);
+}
 const showSelector = false;
 
 if (showSelector) {
@@ -391,7 +383,7 @@ function showArrowSequence(arrowSequence, arrowsContainer) {
 
     // Remove all table elements of old arrows
     arrowsContainer.innerHTML = '';
-
+    
     //Create new arrow elements
     let arrowTags = [];
     for (arrow of arrowSequence) {
